@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王权四重奏</title>
+    <style>
+        :root {
+            --color-red: #d62828;
+            --color-yellow: #fcbf49;
+            --color-green: #06d6a0;
+            --color-purple: #7209b7;
+            --color-dark: #073b4c;
+            --color-darker: #023047;
+            --color-light: #f1faee;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', '微软雅黑', Arial, monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--color-darker) 0%, var(--color-dark) 100%);
+            color: var(--color-light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-attachment: fixed;
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(2, 48, 71, 0.9);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid rgba(241, 250, 238, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 头部样式 */
+        .game-header {
+            background: linear-gradient(90deg, var(--color-red) 0%, var(--color-yellow) 33%, var(--color-green) 66%, var(--color-purple) 100%);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.08) 75%);
+            background-size: 30px 30px;
+            opacity: 0.7;
+        }
+        
+        .game-title {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .game-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 游戏内容区 */
+        .game-content {
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+        }
+        
+        /* 国王图像区 */
+        .king-image {
+            background: rgba(2, 48, 71, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            overflow: hidden;
+            border: 1px solid rgba(241, 250, 238, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        .king-image img {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+            object-fit: cover;
+            width: 250px;
+            height: 300px;
+        }
+        
+        .king-image img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* 对话文本区 */
+        .dialog-area {
+            background: rgba(7, 59, 76, 0.6);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid rgba(241, 250, 238, 0.1);
+            line-height: 1.8;
+        }
+        
+        .king-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .name-red { color: var(--color-red); }
+        .name-yellow { color: var(--color-yellow); }
+        .name-green { color: var(--color-green); }
+        .name-purple { color: var(--color-purple); }
+        
+        .dialog-text {
+            font-size: 1rem;
+            white-space: pre-line;
+        }
+        
+        .typing-cursor::after {
+            content: "|";
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        /* 选项区 */
+        .options-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option-btn {
+            background: rgba(7, 59, 76, 0.8);
+            border: 2px solid rgba(241, 250, 238, 0.2);
+            border-radius: 8px;
+            color: var(--color-light);
+            padding: 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(241, 250, 238, 0.1), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .option-btn:hover {
+            background: rgba(2, 48, 71, 0.9);
+            border-color: var(--color-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .option-btn:hover::after {
+            left: 150%;
+        }
+        
+        .option-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 控制按钮区 */
+        .controls-area {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(135deg, var(--color-dark), var(--color-darker));
+            border: 2px solid var(--color-light);
+            border-radius: 8px;
+            color: var(--color-light);
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+        
+        .control-btn:hover {
+            background: linear-gradient(135deg, var(--color-darker), var(--color-dark));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 隐藏元素 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--color-light);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 进度指示器 */
+        .progress-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            height: 6px;
+            background: rgba(241, 250, 238, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-red), var(--color-yellow), var(--color-green), var(--color-purple));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* 结果页面 */
+        .result-container {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--color-yellow);
+        }
+        
+        .result-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(241, 250, 238, 0.1);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(241, 250, 238, 0.3);
+            border-radius: 4px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .options-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .king-image {
+                padding: 15px;
+                min-height: 250px;
+            }
+            
+            .king-image img {
+                width: 200px;
+                height: 250px;
+            }
+            
+            .dialog-area {
+                padding: 20px;
+                font-size: 0.95rem;
+            }
+            
+            .control-btn {
+                padding: 10px 25px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-header {
+                padding: 20px 15px;
+            }
+            
+            .game-title {
+                font-size: 1.8rem;
+            }
+            
+            .game-content {
+                padding: 15px;
+            }
+            
+            .option-btn {
+                padding: 12px;
+                font-size: 0.95rem;
+            }
+            
+            .king-image img {
+                width: 180px;
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏头部 -->
+        <div class="game-header">
+            <h1 class="game-title">王权四重奏</h1>
+            <p class="game-subtitle">穿越时空，挑战四位王者的智慧试炼</p>
+        </div>
+        
+        <!-- 游戏内容区 -->
+        <div class="game-content">
+            <!-- 进度指示器 -->
+            <div class="progress-container hidden" id="progressContainer">
+                <div class="progress-text">第 <span id="currentQuestion">1</span> 关 / 共 4 关</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="kingTitle">红桃K的帝国之问</div>
+            </div>
+            
+            <!-- 国王图像区 -->
+            <div class="king-image hidden" id="kingImage">
+                <img src="" alt="国王图像" id="kingImageImg" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDI1MCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNTAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMDczQjRDIi8+CjxwYXRoIGQ9Ik0xMjUgODBDMTQwLjkyMyA4MCAxNTMgOTIuMDc3MyAxNTMgMTA4QzE1MyAxMjMuOTIzIDE0MC45MjMgMTM2IDEyNSAxMzZDMTEwLjA3NyAxMzYgOTggMTIzLjkyMyA5OCAxMDhDOTggOTIuMDc3MyAxMTAuMDc3IDgwIDEyNSA4MFoiIGZpbGw9IiNGQ0JGNDkiLz4KPHBhdGggZD0iTTEyNSAxNjBDMTU1LjgyNSAxNjAgMTgxIDE4NS4xNzUgMTgxIDIxNkMxODEgMjQ2LjgyNSAxNTUuODI1IDI3MiAxMjUgMjcyQzk0LjE3NSAyNzIgNjkgMjQ2LjgyNSA2OSAyMTZDNjkgMTg1LjE3NSA5NC4xNzUgMTYwIDEyNSAxNjBaIiBmaWxsPSIjMDcyMDlCIi8+CjxwYXRoIGQ9Ik0xMDUgMTcwQzEwNSAxNzAgMTE1IDE1NSAxMjUgMTU1QzEzNSAxNTUgMTQ1IDE3MCAxNDUgMTcwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIvPgo8cGF0aCBkPSJNMTE1IDIwMEMxMTUgMjAwIDExNSAyMTUgMTI1IDIxNUMxMzUgMjE1IDEzNSAyMDAgMTM1IDIwMCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjQiLz4KPHBhdGggZD0iTTEwNSAyMjBDMTA1IDIyMCAxMTUgMjMwIDEyNSAyMzBDMTM1IDIzMCAxNDUgMjIwIDE0NSAyMjAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSI0Ii8+Cjx0ZXh0IHg9IjEyNSIgeT0iMjkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIiBmb250LXNpemU9IjE2IiBmb250LWZhbWlseT0iQXJpYWwiPktpbmcgSW1hZ2U8L3RleHQ+Cjwvc3ZnPgo=';">
+            </div>
+            
+            <!-- 对话文本区 -->
+            <div class="dialog-area">
+                <div class="king-name hidden" id="kingName"></div>
+                <div class="dialog-text typing-cursor" id="dialogText">游戏加载中...</div>
+            </div>
+            
+            <!-- 选项按钮区 -->
+            <div class="options-area hidden" id="optionsArea">
+                <button class="option-btn" id="optionA" data-answer="A">A. </button>
+                <button class="option-btn" id="optionB" data-answer="B">B. </button>
+                <button class="option-btn" id="optionC" data-answer="C">C. </button>
+                <button class="option-btn" id="optionD" data-answer="D">D. </button>
+            </div>
+            
+            <!-- 控制按钮区 -->
+            <div class="controls-area">
+                <button class="control-btn" id="startBtn">开始游戏</button>
+                <button class="control-btn hidden" id="restartBtn">重新开始</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 国王图像数据 - 使用稳定的历史国王图像链接
+        const kingImageData = {
+            "尤利乌斯·凯撒": {
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Julius_Caesar_-_Illustrazione_dal_manoscritto_De_viris_illustribus.jpg/320px-Julius_Caesar_-_Illustrazione_dal_manoscritto_De_viris_illustribus.jpg",
+                color: "red",
+                alt: "尤利乌斯·凯撒画像"
+            },
+            "大卫王": {
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/King_David_-_Psalter_of_St_Louis_Fr_104A_f.65v.jpg/320px-King_David_-_Psalter_of_St_Louis_Fr_104A_f.65v.jpg",
+                color: "yellow",
+                alt: "大卫王画像"
+            },
+            "亚历山大大帝": {
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Alexander_the_Great_mosaic.jpg/320px-Alexander_the_Great_mosaic.jpg",
+                color: "green",
+                alt: "亚历山大大帝画像"
+            },
+            "查理曼大帝": {
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Charlemagne_coronation.jpg/320px-Charlemagne_coronation.jpg",
+                color: "purple",
+                alt: "查理曼大帝画像"
+            }
+        };
+
+        // 游戏问题数据
+        const gameQuestions = [
+            {
+                king: "查理曼大帝",
+                title: "第一关：红桃K的帝国之问",
+                question: "我，查理曼，在公元800年的圣诞节于罗马加冕，被教皇利奥三世授予了\"罗马人的皇帝\"头衔。这一事件标志着一个新的欧洲帝国的诞生，也象征着哪两个重要权力的结合，奠定了中世纪西欧政教关系的基础？",
+                options: {
+                    A: "皇权与贵族权",
+                    B: "皇权与神权（教权）",
+                    C: "军权与民权",
+                    D: "王权与金权"
+                },
+                correct: "B",
+                correctResponse: "正确！我与教皇的联合，让我的统治带上了神圣的光环，皇权与神权的结合，是照亮中世纪黑暗时代的一把火炬。你有资格面对下一位王者。",
+                wrongResponse: "遗憾。看来你对\"上帝的归上帝，凯撒的归凯撒\"之后的演变一无所知。你的灵魂，将留下一部分在我这里。"
+            },
+            {
+                king: "尤利乌斯·凯撒",
+                title: "第二关：方块K的军团之问",
+                question: "我，凯撒，一生征战，最辉煌的功绩之一便是征服了高卢。我将这段经历写成了《高卢战记》，开篇第一句\"整个高卢分为三部分\"脍炙人口。我征服高卢最重要的战略意义是什么？",
+                options: {
+                    A: "获得了巨大的个人声望和一支只效忠于我的军队",
+                    B: "为罗马带来了数不尽的黄金和奴隶",
+                    C: "为罗马消除了北方的百年边患，奠定了帝国北部疆域的基础",
+                    D: "学会了酿造美味的葡萄酒"
+                },
+                correct: "C",
+                correctResponse: "明智的判断！财富与声望皆是附庸，真正的功绩在于为罗马开拓并守护了疆土。高卢的平定，让罗马的北方从此高枕无忧。你通过了军团的考验。",
+                wrongResponse: "哼，你的眼光和元老院里那些短视的贵族一样肤浅。你只看到了战利品，却看不到帝国的版图！留下你的勇气吧。"
+            },
+            {
+                king: "亚历山大大帝",
+                title: "第三关：梅花K的远征之问",
+                question: "我，亚历山大，从希腊一路东征，直至印度河流域，建立了一个空前庞大的帝国。我的远征不仅在军事上取得了胜利，更带来了一项深远的文化影响，这场东西方文明的大融合被后世称为什么？",
+                options: {
+                    A: "文艺复兴",
+                    B: "启蒙运动",
+                    C: "希腊化时代",
+                    D: "大航海时代"
+                },
+                correct: "C",
+                correctResponse: "说得好！我的梦想，正是让希腊文明与东方智慧融合，创造一个全新的世界。\"希腊化时代\"，正是我留给后世的遗产。你有资格见识最后一位王者的威严。",
+                wrongResponse: "错误。你似乎对历史的大潮流一无所知。我的东征开启了希腊化时代，将希腊文化传播到了东方。你的知识储备还不足以通过我的考验。"
+            },
+            {
+                king: "大卫王",
+                title: "第四关：黑桃K的圣王之问",
+                question: "我，大卫，被尊为以色列最伟大的君王，不仅因为我建立了统一的以色列王国，更因为我在信仰上的虔诚。我创作了许多诗篇，其中哪一篇被基督徒和犹太教徒共同视为对弥赛亚（救世主）的预言，在圣经中具有特殊地位？",
+                options: {
+                    A: "诗篇第1篇（论福）",
+                    B: "诗篇第23篇（耶和华是我的牧者）",
+                    C: "诗篇第51篇（忏悔诗）",
+                    D: "诗篇第110篇（耶和华对我主说）"
+                },
+                correct: "D",
+                correctResponse: "你的智慧令我欣慰！诗篇110篇确实是关于弥赛亚的重要预言，被新约多次引用。你通过了所有考验，证明了自己配得上王者的智慧。",
+                wrongResponse: "可惜，你对神圣的篇章了解不足。诗篇110篇才是关于弥赛亚的关键预言。你的灵魂将留在这里，与历代智者一同沉思。"
+            }
+        ];
+
+        // 游戏状态
+        let gameState = {
+            currentQuestion: 0,
+            score: 0,
+            gameStarted: false,
+            gameOver: false
+        };
+
+        // DOM元素
+        const kingImage = document.getElementById('kingImage');
+        const kingImageImg = document.getElementById('kingImageImg');
+        const kingName = document.getElementById('kingName');
+        const dialogText = document.getElementById('dialogText');
+        const optionsArea = document.getElementById('optionsArea');
+        const optionA = document.getElementById('optionA');
+        const optionB = document.getElementById('optionB');
+        const optionC = document.getElementById('optionC');
+        const optionD = document.getElementById('optionD');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const currentQuestion = document.getElementById('currentQuestion');
+        const kingTitle = document.getElementById('kingTitle');
+
+        // 事件监听器
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', restartGame);
+
+        // 选项按钮事件
+        [optionA, optionB, optionC, optionD].forEach(option => {
+            option.addEventListener('click', handleAnswer);
+        });
+
+        // 开始游戏
+        function startGame() {
+            gameState.gameStarted = true;
+            gameState.currentQuestion = 0;
+            gameState.score = 0;
+            
+            startBtn.classList.add('hidden');
+            restartBtn.classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            
+            loadQuestion(gameState.currentQuestion);
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            gameState.gameStarted = true;
+            gameState.currentQuestion = 0;
+            gameState.score = 0;
+            gameState.gameOver = false;
+            
+            optionsArea.classList.remove('hidden');
+            kingImage.classList.remove('hidden');
+            kingName.classList.remove('hidden');
+            
+            loadQuestion(gameState.currentQuestion);
+        }
+
+        // 加载问题
+        function loadQuestion(index) {
+            if (index >= gameQuestions.length) {
+                endGame();
+                return;
+            }
+            
+            const question = gameQuestions[index];
+            
+            // 更新进度条
+            currentQuestion.textContent = index + 1;
+            progressFill.style.width = `${(index / gameQuestions.length) * 100}%`;
+            kingTitle.textContent = question.title;
+            
+            // 设置国王图像和名字
+            const kingData = kingImageData[question.king];
+            kingImageImg.src = kingData.image;
+            kingImageImg.alt = kingData.alt;
+            kingName.textContent = question.king;
+            kingName.className = `king-name name-${kingData.color}`;
+            
+            // 显示国王图像和名字
+            kingImage.classList.remove('hidden');
+            kingName.classList.remove('hidden');
+            
+            // 打字机效果显示问题
+            typeText(dialogText, question.question, () => {
+                // 问题显示完成后显示选项
+                optionsArea.classList.remove('hidden');
+                
+                // 设置选项文本
+                optionA.textContent = `A. ${question.options.A}`;
+                optionB.textContent = `B. ${question.options.B}`;
+                optionC.textContent = `C. ${question.options.C}`;
+                optionD.textContent = `D. ${question.options.D}`;
+                
+                // 启用所有选项
+                [optionA, optionB, optionC, optionD].forEach(option => {
+                    option.disabled = false;
+                });
+            });
+        }
+
+        // 处理答案
+        function handleAnswer(e) {
+            const selectedOption = e.target;
+            const answer = selectedOption.dataset.answer;
+            const question = gameQuestions[gameState.currentQuestion];
+            
+            // 禁用所有选项
+            [optionA, optionB, optionC, optionD].forEach(option => {
+                option.disabled = true;
+            });
+            
+            // 检查答案
+            if (answer === question.correct) {
+                gameState.score++;
+                typeText(dialogText, question.correctResponse, () => {
+                    // 正确回答后延迟进入下一题
+                    setTimeout(() => {
+                        gameState.currentQuestion++;
+                        loadQuestion(gameState.currentQuestion);
+                    }, 2000);
+                });
+            } else {
+                typeText(dialogText, question.wrongResponse, () => {
+                    // 错误回答后显示游戏结束
+                    setTimeout(() => {
+                        endGame(false);
+                    }, 2000);
+                });
+            }
+        }
+
+        // 结束游戏
+        function endGame(success = true) {
+            gameState.gameOver = true;
+            
+            // 隐藏不需要的元素
+            optionsArea.classList.add('hidden');
+            kingImage.classList.add('hidden');
+            kingName.classList.add('hidden');
+            progressContainer.classList.add('hidden');
+            
+            // 创建结果页面
+            const resultHTML = `
+                <div class="result-container">
+                    <h2 class="result-title">${success ? '恭喜！你通过了所有考验！' : '很遗憾，你未能通过所有考验'}</h2>
+                    <p class="result-message">
+                        ${success 
+                            ? '你已证明自己具备王者的智慧与远见，四位君王的认可将伴随你一生。愿这份智慧指引你在人生的道路上做出明智的抉择。' 
+                            : `你在第${gameState.currentQuestion}关未能通过${gameQuestions[gameState.currentQuestion-1].king}的考验。历史总是青睐那些有准备的人，或许下次你能做得更好。`}
+                    </p>
+                    <p class="result-message">
+                        最终得分：${gameState.score} / ${gameQuestions.length}
+                    </p>
+                </div>
+            `;
+            
+            // 替换对话区域内容
+            dialogText.classList.remove('typing-cursor');
+            dialogText.innerHTML = resultHTML;
+        }
+
+        // 打字机效果函数
+        function typeText(element, text, callback) {
+            element.textContent = '';
+            element.classList.add('typing-cursor');
+            
+            let i = 0;
+            const typing = setInterval(() => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typing);
+                    element.classList.remove('typing-cursor');
+                    if (callback) callback();
+                }
+            }, 30);
+        }
+
+        // 初始化游戏
+        function initGame() {
+            typeText(dialogText, "欢迎来到《王权四重奏》！\n\n在这个游戏中，你将面对四位历史上的伟大君王，回答他们的问题，证明你的智慧。\n\n每个问题只有一个正确答案，谨慎选择！\n\n点击\"开始游戏\"按钮开始挑战。");
+        }
+
+        // 页面加载完成后初始化游戏
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
